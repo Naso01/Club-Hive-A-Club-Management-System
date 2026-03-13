@@ -1,7 +1,7 @@
 ﻿namespace ClubHive.Models
 {
-    public class Student : User
+    public class Admin : User
     {
-        
+
     }
 }
