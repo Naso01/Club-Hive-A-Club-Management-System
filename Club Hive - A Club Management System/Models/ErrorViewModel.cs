@@ -1,4 +1,4 @@
-namespace Club_Hive___A_Club_Management_System.Models
+namespace ClubHive.Models
 {
     public class ErrorViewModel
     {

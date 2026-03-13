@@ -1,8 +1,8 @@
-using Club_Hive___A_Club_Management_System.Models;
+using ClubHive.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Club_Hive___A_Club_Management_System.Controllers
+namespace ClubHive.Controllers
 {
     public class HomeController : Controller
     {
