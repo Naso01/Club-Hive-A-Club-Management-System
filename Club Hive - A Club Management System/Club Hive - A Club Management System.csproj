@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Club_Hive___A_Club_Management_System</RootNamespace>
+    <RootNamespace>ClubHive</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
