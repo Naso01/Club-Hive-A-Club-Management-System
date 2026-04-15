@@ -1,12 +1,17 @@
 @model Club
 
 @{
-    ViewData["Title"] = "Create Club";
+    var isEditing = Model?.Id > 0;
+    ViewData["Title"] = isEditing ? "Edit Club" : "Create Club";
 }
 
 <div class="container mt-4">
-    <h1>Create Club</h1>
-    <p class="text-muted">Add your club details and preview the image URL in real time.</p>
+    <h1>@(isEditing ? "Edit Club" : "Create Club")</h1>
+    <p class="text-muted">
+        @(isEditing
+            ? "Update club details and save your changes."
+            : "Add your club details and preview the image URL in real time.")
+    </p>
 
     @if (TempData["SuccessMessage"] is string successMessage)
     {
@@ -17,7 +22,8 @@
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    <form asp-controller="Clubs" asp-action="Create" method="post" class="row g-4">
+    <form asp-controller="Clubs" asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4">
+        <input asp-for="Id" type="hidden" />
         <div class="col-12">
             <label asp-for="Name" class="form-label">Club Name</label>
             <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter your club name" required />
@@ -30,10 +36,22 @@
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
-        <div class="col-12">
+        <div class="col-12" id="imageUrlGroup">
             <label asp-for="ImageUrl" class="form-label">Image URL</label>
             <input asp-for="ImageUrl" class="form-control" id="clubImageUrlInput" placeholder="https://example.com/club-image.jpg" />
             <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        </div>
+
+        <div class="col-12" id="imageUploadGroup">
+            <label class="form-label">Or Drag and Drop Image</label>
+            <div id="imageDropZone"
+                 class="border border-2 border-secondary-subtle rounded p-4 text-center bg-light"
+                 style="min-height: 160px; cursor: pointer;">
+                <p class="mb-1 fw-semibold">Drop image here</p>
+                <p class="mb-2 text-muted">or click to browse from your PC</p>
+                <small class="text-muted">Supported: JPG, PNG, GIF, WEBP</small>
+            </div>
+            <input type="file" id="uploadedImage" name="uploadedImage" class="d-none" accept="image/*" />
         </div>
 
         <div class="col-12">
@@ -45,7 +63,13 @@
         </div>
 
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">Save Club</button>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@(isEditing ? "Update Club" : "Save Club")</button>
+                @if (isEditing)
+                {
+                    <a asp-controller="Clubs" asp-action="Manage" class="btn btn-outline-secondary">Back to Managed Clubs</a>
+                }
+            </div>
         </div>
     </form>
 </div>
@@ -55,10 +79,12 @@
     <script>
         (() => {
             const imageUrlInput = document.getElementById("clubImageUrlInput");
+            const imageDropZone = document.getElementById("imageDropZone");
+            const uploadedImageInput = document.getElementById("uploadedImage");
             const imagePreview = document.getElementById("clubImagePreview");
             const imagePreviewHint = document.getElementById("imagePreviewHint");
 
-            if (!imageUrlInput || !imagePreview || !imagePreviewHint) {
+            if (!imageUrlInput || !imageDropZone || !uploadedImageInput || !imagePreview || !imagePreviewHint) {
                 return;
             }
 
@@ -88,6 +114,44 @@
                 testImage.onerror = () => clearPreview("Unable to load image from this URL.");
                 testImage.src = url;
             };
+
+            const previewUploadedImage = () => {
+                const file = uploadedImageInput.files && uploadedImageInput.files[0];
+                if (!file) {
+                    clearPreview("Enter a valid image URL or drop an image to preview.");
+                    return;
+                }
+
+                imageUrlInput.value = "";
+                const objectUrl = URL.createObjectURL(file);
+                showPreview(objectUrl);
+            };
+
+            uploadedImageInput.addEventListener("change", previewUploadedImage);
+
+            imageDropZone.addEventListener("click", () => uploadedImageInput.click());
+
+            imageDropZone.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                imageDropZone.classList.add("border-primary", "bg-white");
+            });
+
+            imageDropZone.addEventListener("dragleave", () => {
+                imageDropZone.classList.remove("border-primary", "bg-white");
+            });
+
+            imageDropZone.addEventListener("drop", (event) => {
+                event.preventDefault();
+                imageDropZone.classList.remove("border-primary", "bg-white");
+
+                const files = event.dataTransfer && event.dataTransfer.files;
+                if (!files || files.length === 0) {
+                    return;
+                }
+
+                uploadedImageInput.files = files;
+                previewUploadedImage();
+            });
 
             imageUrlInput.addEventListener("input", previewImage);
             previewImage();
