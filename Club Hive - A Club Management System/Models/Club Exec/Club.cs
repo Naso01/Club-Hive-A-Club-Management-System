@@ -7,6 +7,7 @@
         public string Description { get; set; }
         
         public List<ClubExecutive> Executives { get; set; }
+        public List<>
 
     }
 }
