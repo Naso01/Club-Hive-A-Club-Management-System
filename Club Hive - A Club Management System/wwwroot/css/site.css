@@ -45,6 +45,15 @@ body {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
 }
 
+.club-card-toggle:focus,
+.club-card-toggle:focus-visible {
+  box-shadow: none;
+}
+
+.club-card-active {
+  box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.35), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

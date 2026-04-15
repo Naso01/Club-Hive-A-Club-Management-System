@@ -28,7 +28,7 @@
             {
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 shadow-sm">
-                        <button class="btn btn-link text-decoration-none text-start p-0 border-0 rounded-top" type="button" data-bs-toggle="collapse" data-bs-target="#club-actions-@club.Id" aria-expanded="false" aria-controls="club-actions-@club.Id">
+                        <button class="btn btn-link text-decoration-none text-start p-0 border-0 rounded-top club-card-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#club-actions-@club.Id" aria-expanded="false" aria-controls="club-actions-@club.Id">
                         @if (!string.IsNullOrWhiteSpace(club.ImageUrl))
                         {
                             <img src="@club.ImageUrl" class="card-img-top" alt="@club.Name" style="max-height: 200px; object-fit: cover;" />
@@ -41,6 +41,7 @@
                         </button>
                         <div class="collapse px-3 pb-3" id="club-actions-@club.Id">
                             <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-success">Add Event</button>
                                 <a asp-controller="Clubs" asp-action="Edit" asp-route-id="@club.Id" class="btn btn-sm btn-outline-primary">Edit</a>
                                 <form asp-controller="Clubs" asp-action="Delete" method="post">
                                     @Html.AntiForgeryToken()
@@ -109,6 +110,27 @@
 
                 deleteClubIdInput.value = clubId ?? "";
                 deleteClubName.textContent = clubName ? `Club: ${clubName}` : "";
+            });
+
+            document.querySelectorAll(".club-card-toggle").forEach((toggleButton) => {
+                const collapseTargetSelector = toggleButton.getAttribute("data-bs-target");
+                if (!collapseTargetSelector) {
+                    return;
+                }
+
+                const collapseElement = document.querySelector(collapseTargetSelector);
+                const cardElement = toggleButton.closest(".card");
+                if (!collapseElement || !cardElement) {
+                    return;
+                }
+
+                collapseElement.addEventListener("show.bs.collapse", () => {
+                    cardElement.classList.add("club-card-active");
+                });
+
+                collapseElement.addEventListener("hide.bs.collapse", () => {
+                    cardElement.classList.remove("club-card-active");
+                });
             });
         })();
     </script>
