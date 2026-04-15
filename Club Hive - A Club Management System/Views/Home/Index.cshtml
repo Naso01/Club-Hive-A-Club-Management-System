@@ -2,7 +2,9 @@
     ViewData["Title"] = "Club Hive";
 }
 
-<div class="container text-center mt-5">
+<div id="beeField" aria-hidden="true"></div>
+
+<div class="container text-center mt-5 bee-page-content">
 
     <h1 class="display-4">🐝 Club Hive</h1>
     <p class="lead">Discover and join clubs at Sheridan College</p>
@@ -42,3 +44,112 @@
     </div>
 
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const beeField = document.getElementById("beeField");
+            if (!beeField) {
+                return;
+            }
+
+            const beeCount = 15;
+            const repulsionRadius = 140;
+            const repulsionStrength = 0.55;
+            const driftStrength = 0.06;
+            const maxSpeed = 1.35;
+
+            const cursor = {
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2,
+                active: false
+            };
+
+            const bees = [];
+
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+            const wrapPosition = (bee) => {
+                if (bee.x < -40) bee.x = window.innerWidth + 30;
+                if (bee.x > window.innerWidth + 40) bee.x = -30;
+                if (bee.y < -40) bee.y = window.innerHeight + 30;
+                if (bee.y > window.innerHeight + 40) bee.y = -30;
+            };
+
+            const createBee = () => {
+                const element = document.createElement("span");
+                element.className = "bee-sprite";
+                element.textContent = "🐝";
+                beeField.appendChild(element);
+
+                const bee = {
+                    element,
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 0.7,
+                    vy: (Math.random() - 0.5) * 0.7,
+                    wobble: Math.random() * Math.PI * 2
+                };
+
+                bees.push(bee);
+            };
+
+            for (let i = 0; i < beeCount; i++) {
+                createBee();
+            }
+
+            window.addEventListener("mousemove", (event) => {
+                cursor.x = event.clientX;
+                cursor.y = event.clientY;
+                cursor.active = true;
+            });
+
+            window.addEventListener("mouseleave", () => {
+                cursor.active = false;
+            });
+
+            window.addEventListener("resize", () => {
+                bees.forEach((bee) => {
+                    bee.x = clamp(bee.x, 0, window.innerWidth);
+                    bee.y = clamp(bee.y, 0, window.innerHeight);
+                });
+            });
+
+            const animate = () => {
+                bees.forEach((bee) => {
+                    bee.wobble += 0.05;
+
+                    bee.vx += (Math.random() - 0.5) * driftStrength;
+                    bee.vy += (Math.random() - 0.5) * driftStrength;
+
+                    if (cursor.active) {
+                        const dx = bee.x - cursor.x;
+                        const dy = bee.y - cursor.y;
+                        const distance = Math.hypot(dx, dy);
+
+                        if (distance < repulsionRadius && distance > 0.001) {
+                            const force = (1 - distance / repulsionRadius) * repulsionStrength;
+                            bee.vx += (dx / distance) * force;
+                            bee.vy += (dy / distance) * force;
+                        }
+                    }
+
+                    bee.vx = clamp(bee.vx, -maxSpeed, maxSpeed);
+                    bee.vy = clamp(bee.vy, -maxSpeed, maxSpeed);
+
+                    bee.x += bee.vx;
+                    bee.y += bee.vy;
+                    wrapPosition(bee);
+
+                    const angle = Math.atan2(bee.vy, bee.vx) * (180 / Math.PI);
+                    const bob = Math.sin(bee.wobble) * 3;
+                    bee.element.style.transform = `translate(${bee.x}px, ${bee.y + bob}px) rotate(${angle}deg)`;
+                });
+
+                requestAnimationFrame(animate);
+            };
+
+            animate();
+        })();
+    </script>
+}

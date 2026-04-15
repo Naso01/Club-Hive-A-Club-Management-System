@@ -21,6 +21,30 @@ body {
   margin-bottom: 60px;
 }
 
+#beeField {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bee-page-content {
+  position: relative;
+  z-index: 1;
+}
+
+.bee-sprite {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1.4rem;
+  opacity: 0.85;
+  user-select: none;
+  will-change: transform;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
