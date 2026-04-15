@@ -1,0 +1,96 @@
+@model Club
+
+@{
+    ViewData["Title"] = "Create Club";
+}
+
+<div class="container mt-4">
+    <h1>Create Club</h1>
+    <p class="text-muted">Add your club details and preview the image URL in real time.</p>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <form asp-controller="Clubs" asp-action="Create" method="post" class="row g-4">
+        <div class="col-12">
+            <label asp-for="Name" class="form-label">Club Name</label>
+            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter your club name" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="5" placeholder="What is your club about?"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="ImageUrl" class="form-label">Image URL</label>
+            <input asp-for="ImageUrl" class="form-control" id="clubImageUrlInput" placeholder="https://example.com/club-image.jpg" />
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <div class="border rounded p-3 bg-light">
+                <h2 class="h5">Image Preview</h2>
+                <p id="imagePreviewHint" class="text-muted mb-2">Enter a valid image URL to preview the image.</p>
+                <img id="clubImagePreview" alt="Club image preview" class="img-fluid rounded d-none" style="max-height: 320px;" />
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Save Club</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const imageUrlInput = document.getElementById("clubImageUrlInput");
+            const imagePreview = document.getElementById("clubImagePreview");
+            const imagePreviewHint = document.getElementById("imagePreviewHint");
+
+            if (!imageUrlInput || !imagePreview || !imagePreviewHint) {
+                return;
+            }
+
+            const clearPreview = (message) => {
+                imagePreview.classList.add("d-none");
+                imagePreview.removeAttribute("src");
+                imagePreviewHint.textContent = message;
+            };
+
+            const showPreview = (url) => {
+                imagePreview.classList.remove("d-none");
+                imagePreview.src = url;
+                imagePreviewHint.textContent = "Image loaded successfully.";
+            };
+
+            const previewImage = () => {
+                const url = imageUrlInput.value.trim();
+
+                if (!url) {
+                    clearPreview("Enter a valid image URL to preview the image.");
+                    return;
+                }
+
+                const testImage = new Image();
+
+                testImage.onload = () => showPreview(url);
+                testImage.onerror = () => clearPreview("Unable to load image from this URL.");
+                testImage.src = url;
+            };
+
+            imageUrlInput.addEventListener("input", previewImage);
+            previewImage();
+        })();
+    </script>
+}

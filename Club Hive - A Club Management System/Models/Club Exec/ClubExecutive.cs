@@ -2,7 +2,11 @@
 {
     public class ClubExecutive : User
     {
-        public List<Club> ?ManagedClubs { get;,. set; }
-        
+        public ClubExecutive()
+        {
+            Rank = UserRank.ClubExecutive;
+        }
+
+        public List<Club>? ManagedClubs { get; set; }
     }
 }

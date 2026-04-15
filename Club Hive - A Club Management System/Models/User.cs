@@ -1,8 +1,15 @@
 ﻿namespace ClubHive.Models
 {
+    public enum UserRank
+    {
+        Student,
+        ClubExecutive,
+        Admin
+    }
+
     public class User
     {
-        private int Id { get; set; }
+        public int Id { get; set; }
 
         public string ?FirstName { get; set; }
         
@@ -12,6 +19,8 @@
 
         public string ?Password { get; set; }
 
-        public List<Club> ?JoinedClubs { get; set; }
+        public UserRank Rank { get; set; } = UserRank.Student;
+
+        public List<Club>? JoinedClubs { get; set; }
     }
 }
