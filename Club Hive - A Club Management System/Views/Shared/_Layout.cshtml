@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var firstName = Context.Session.GetString("LoggedInFirstName");
+    var isLoggedIn = !string.IsNullOrWhiteSpace(firstName);
+    var userRank = Context.Session.GetString("LoggedInUserRank");
+    var isClubExecutive = userRank == "ClubExecutive";
+    var loginError = TempData["LoginError"] as string;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,7 +17,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Club_Hive___A_Club_Management_System.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -26,26 +34,61 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Clubs" asp-action="Index">Clubs</a>
+                        </li>
                     </ul>
-                    <div class="d-flex">
-                        <button type="button"
-                                class="btn btn-outline-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#loginModal">
-                            Log In
-                        </button>
-                    </div>
+                    @if (isLoggedIn)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold text-dark">Welcome @firstName</span>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
+                                    👤
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Home" asp-action="Account">Account</a>
+                                    </li>
+                                    @if (isClubExecutive)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Clubs" asp-action="Manage">Manage Clubs</a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Home" asp-action="SignOut" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">Sign Out</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex">
+                            <button type="button"
+                                    class="btn btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#loginModal">
+                                Log In
+                            </button>
+                        </div>
+                    }
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-auto">
         <div class="container">
             &copy; 2026 - Club Hive | A Club Management System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
@@ -54,33 +97,58 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginModalLabel">Log In to Club Hive</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    @if (!isLoggedIn)
+    {
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Log In to Club Hive</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form asp-controller="Home" asp-action="Login" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="modal-body">
+                            @if (!string.IsNullOrWhiteSpace(loginError))
+                            {
+                                <div class="alert alert-danger mb-3" role="alert">
+                                    @loginError
+                                </div>
+                            }
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@example.com" required>
+                            </div>
+                            <div class="mb-2">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter password" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between align-items-center">
+                            <a class="text-decoration-none" asp-area="" asp-controller="Home" asp-action="SignUp">New here? Sign up</a>
+                            <button type="submit" class="btn btn-primary">Log In</button>
+                        </div>
+                    </form>
                 </div>
-                <form>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="loginEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="loginPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter password" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer d-flex justify-content-between align-items-center">
-                        <a class="text-decoration-none" asp-area="" asp-controller="Home" asp-action="SignUp">New here? Sign up</a>
-                        <button type="submit" class="btn btn-primary">Log In</button>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (!string.IsNullOrWhiteSpace(loginError))
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const loginModalElement = document.getElementById("loginModal");
+                if (!loginModalElement) {
+                    return;
+                }
+
+                const loginModal = new bootstrap.Modal(loginModalElement);
+                loginModal.show();
+            });
+        </script>
+    }
 </body>
 </html>

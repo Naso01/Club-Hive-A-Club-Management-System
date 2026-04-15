@@ -143,7 +143,7 @@
 
                     const angle = Math.atan2(bee.vy, bee.vx) * (180 / Math.PI);
                     const bob = Math.sin(bee.wobble) * 3;
-                    bee.element.style.transform = `translate(${bee.x}px, ${bee.y + bob}px) rotate(${angle}deg)`;
+                    bee.element.style.transform = `translate(${bee.x}px, ${bee.y + bob}px) rotate(${angle}deg) rotateY(180deg)`;
                 });
 
                 requestAnimationFrame(animate);
